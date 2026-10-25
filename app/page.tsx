@@ -304,8 +304,7 @@ export default function Home() {
             </p>
           </div>
           <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} MCB Inmobiliaria. Todos los derechos
-            reservados.
+           © 2026 MCB Inmobiliaria. Todos los derechos reservados.
           </p>
         </div>
       </footer>
