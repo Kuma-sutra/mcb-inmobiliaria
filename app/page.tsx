@@ -1,40 +1,78 @@
-const propiedades = [
-  {
-    id: 1,
-    tipo: "CASA",
-    operacion: "VENTA",
-    titulo: "Casa familiar en Federación",
-    ubicacion: "Federación, Entre Ríos",
-    precio: "Consultar precio",
-    detalle: "3 dormitorios · 2 baños · Patio",
-    imagen:
-      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: 2,
-    tipo: "TERRENO",
-    operacion: "VENTA",
-    titulo: "Terreno para construir",
-    ubicacion: "Federación, Entre Ríos",
-    precio: "Consultar precio",
-    detalle: "Excelente oportunidad de inversión",
-    imagen:
-      "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=85",
-  },
-  {
-    id: 3,
-    tipo: "PROPIEDAD",
-    operacion: "ALQUILER",
-    titulo: "Propiedad en alquiler",
-    ubicacion: "Federación, Entre Ríos",
-    precio: "Consultar precio",
-    detalle: "Consultanos por disponibilidad",
-    imagen:
-      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1000&q=85",
-  },
-];
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+  export default function Home() {
+  const [propiedades, setPropiedades] = useState<any[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filtroOperacion, setFiltroOperacion] = useState("");
+const [filtroTipo, setFiltroTipo] = useState("");
+const [filtroCiudad, setFiltroCiudad] = useState("");
+const propiedadesFiltradas = propiedades.filter((propiedad) => {
+  const coincideOperacion =
+    !filtroOperacion || propiedad.operation_type === filtroOperacion;
+
+  const coincideTipo =
+    !filtroTipo || propiedad.property_type === filtroTipo;
+
+  const coincideCiudad =
+    !filtroCiudad ||
+    propiedad.city?.toLowerCase().includes(filtroCiudad.toLowerCase());
+
+  return coincideOperacion && coincideTipo && coincideCiudad;
+});
+
+  useEffect(() => {
+      async function cargarPropiedades() {
+    const { data, error } = await supabase
+      .from("properties")
+      .select("*")
+      .eq("status", "published")
+      .order("created_at", { ascending: false });
+console.log("PROPIEDADES RECIBIDAS:", data);
+    if (error) {
+      console.error("Error al cargar propiedades:", error.message);
+      setError("No se pudieron cargar las propiedades.");
+      setCargando(false);
+      return;
+    }
+
+    const { data: imagenes, error: errorImagenes } = await supabase
+      .from("property_images")
+      .select("property_id, image_url, is_cover, display_order")
+      .order("display_order", { ascending: true });
+
+    if (errorImagenes) {
+      console.error("Error al cargar imágenes:", errorImagenes.message);
+      setError("No se pudieron cargar las fotografías.");
+      setCargando(false);
+      return;
+    }
+
+    const propiedadesConImagen = (data ?? []).map((propiedad) => {
+      const imagenesPropiedad = (imagenes ?? []).filter(
+        (imagen) => imagen.property_id === propiedad.id
+      );
+
+      const imagenPrincipal =
+        imagenesPropiedad.find((imagen) => imagen.is_cover) ??
+        imagenesPropiedad[0];
+
+      return {
+        ...propiedad,
+        imagen: imagenPrincipal?.image_url ?? "",
+      };
+    });
+
+    console.log("Propiedades con imágenes:", propiedadesConImagen);
+
+    setPropiedades(propiedadesConImagen);
+    setCargando(false);
+  }
+
+  cargarPropiedades();
+}, []);
   return (
     <main className="min-h-screen bg-white text-slate-800">
       <header className="border-b border-slate-200 bg-white">
@@ -174,40 +212,57 @@ export default function Home() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {propiedades.map((propiedad) => (
+          {propiedadesFiltradas.map((propiedad) => (
             <article
               key={propiedad.id}
               className="overflow-hidden border border-slate-200 bg-white transition hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="relative h-60">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={propiedad.imagen}
-                  alt={propiedad.titulo}
-                  className="h-full w-full object-cover"
-                />
+               {propiedad.imagen ? (
+  <img
+    src={propiedad.imagen}
+    alt={propiedad.title}
+    className="h-full w-full object-cover"
+  />
+) : (
+  <div className="h-full w-full bg-slate-200 flex items-center justify-center">
+    <span className="text-slate-500 text-sm">
+      Imagen no disponible
+    </span>
+  </div>
+)}
                 <span className="absolute left-4 top-4 bg-white px-3 py-2 text-xs font-bold tracking-wider text-slate-900">
-                  {propiedad.operacion}
+                  {propiedad.operation_type}
                 </span>
               </div>
 
               <div className="p-6">
                 <p className="text-xs font-semibold tracking-widest text-amber-600">
-                  {propiedad.tipo}
+                  {propiedad.property_type}
                 </p>
                 <h3 className="mt-2 text-xl font-bold text-slate-900">
-                  {propiedad.titulo}
+                  {propiedad.address}
                 </h3>
                 <p className="mt-2 text-sm text-slate-500">
-                  {propiedad.ubicacion}
+                  {[propiedad.address, propiedad.city, propiedad.province]
+  .filter(Boolean)
+  .join(", ")}
                 </p>
                 <p className="mt-4 text-sm text-slate-600">
-                  {propiedad.detalle}
-                </p>
+                  {propiedad.description}
+                </p> 
                 <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-5">
                   <span className="font-semibold text-slate-900">
-                    {propiedad.precio}
+                    {propiedad.price != null
+  ? `${propiedad.currency} ${Number(propiedad.price).toLocaleString("es-AR")}`
+  : "Consultar precio"}
                   </span>
+                  <a
+  href={`/propiedades/${propiedad.id}`}
+  className="text-sm font-bold text-slate-900 hover:text-amber-600"
+>
+  Ver propiedad →
+</a>
                   <a
                     href="#contacto"
                     className="text-sm font-bold text-amber-700 hover:text-amber-500"
@@ -279,7 +334,7 @@ export default function Home() {
             o conversar sobre tu próximo paso.
           </p>
           <a
-            href="https://wa.me/5490000000000"
+            href="https://wa.me/5493456590400"
             target="_blank"
             rel="noreferrer"
             className="mt-7 inline-flex bg-slate-900 px-7 py-4 font-semibold text-white transition hover:bg-amber-600"
@@ -310,4 +365,4 @@ export default function Home() {
       </footer>
     </main>
   );
-}
+  }
