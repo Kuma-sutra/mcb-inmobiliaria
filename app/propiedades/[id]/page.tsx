@@ -298,34 +298,92 @@ const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
 
         </section>
 
-        {/* CONTACTO */}
+    {/* CONTACTO Y FORMULARIO */}
 
-        <section style={styles.contact}>
+<section style={styles.section}>
 
-          <div>
+  <h2 style={styles.sectionTitle}>
+    ¿Te interesa esta propiedad?
+  </h2>
 
-            <h2 style={styles.contactTitle}>
-              ¿Te interesa esta propiedad?
-            </h2>
+  <p style={styles.contactText}>
+    Completá el formulario y nos comunicaremos con vos.
+  </p>
 
-            <p style={styles.contactText}>
-              Comunicate con MCB Inmobiliaria.
-              Estamos para asesorarte.
-            </p>
+  <form onSubmit={enviarConsulta} style={styles.form}>
 
-          </div>
+    <label style={styles.label}>
+      Nombre y apellido *
+      <input
+        type="text"
+        value={nombre}
+        onChange={(e) => setNombre(e.target.value)}
+        required
+        style={styles.input}
+        placeholder="Tu nombre"
+      />
+    </label>
 
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.whatsapp}
-          >
-            Consultar por WhatsApp →
-          </a>
+    <label style={styles.label}>
+      Correo electrónico
+      <input
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={styles.input}
+        placeholder="tu@email.com"
+      />
+    </label>
 
-        </section>
+    <label style={styles.label}>
+      Teléfono *
+      <input
+        type="tel"
+        value={telefono}
+        onChange={(e) => setTelefono(e.target.value)}
+        required
+        style={styles.input}
+        placeholder="Tu teléfono"
+      />
+    </label>
 
+    <label style={styles.label}>
+      Mensaje *
+      <textarea
+        value={mensaje}
+        onChange={(e) => setMensaje(e.target.value)}
+        required
+        style={styles.textarea}
+        placeholder="Quisiera recibir más información sobre esta propiedad..."
+      />
+    </label>
+
+    <button
+      type="submit"
+      disabled={enviando}
+      style={styles.submitButton}
+    >
+      {enviando ? "Enviando..." : "Enviar consulta"}
+    </button>
+
+    {mensajeFormulario && (
+      <p style={styles.formMessage}>
+        {mensajeFormulario}
+      </p>
+    )}
+
+  </form>
+
+  <a
+    href={whatsappLink}
+    target="_blank"
+    rel="noopener noreferrer"
+    style={styles.whatsapp}
+  >
+    Consultar también por WhatsApp →
+  </a>
+
+</section>
         {/* PIE */}
 
         <footer style={styles.footer}>
@@ -532,9 +590,56 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
 
   contactText: {
-    color: "#CBD5E1",
-  },
-
+  color: "#475569",
+  marginBottom: 12,
+},
+form: {
+  display: "grid",
+  gap: 16,
+  maxWidth: 650,
+  marginTop: 24,
+  marginBottom: 24,
+},
+label: {
+  display: "flex",
+  flexDirection: "column",
+  gap: 8,
+  fontWeight: 600,
+  color: "#14213D",
+},
+input: {
+  padding: "13px 14px",
+  border: "1px solid #CBD5E1",
+  borderRadius: 7,
+  fontSize: 16,
+  width: "100%",
+  boxSizing: "border-box",
+},
+textarea: {
+  padding: "13px 14px",
+  border: "1px solid #CBD5E1",
+  borderRadius: 7,
+  fontSize: 16,
+  minHeight: 120,
+  resize: "vertical",
+  width: "100%",
+  boxSizing: "border-box",
+},
+submitButton: {
+  background: "#D97706",
+  color: "#FFFFFF",
+  padding: "15px 22px",
+  border: "none",
+  borderRadius: 7,
+  fontWeight: 750,
+  fontSize: 16,
+  cursor: "pointer",
+},
+formMessage: {
+  marginTop: 10,
+  fontWeight: 600,
+  color: "#14213D",
+},
   whatsapp: {
     background: "#25D366",
     color: "#FFFFFF",

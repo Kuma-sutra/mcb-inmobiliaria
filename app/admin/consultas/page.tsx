@@ -11,10 +11,12 @@ type Consulta = {
   email: string | null;
   telefono: string | null;
   propiedad_id: string | null;
-  propiedad?: {
-    title: string;
-    address: string | null;
-  } | null;
+  mensaje: string;
+  estado: string;
+  propiedad: {
+  title: string;
+  address: string | null;
+}[] | null;
 };
 
 export default function AdminConsultasPage() {
@@ -41,12 +43,20 @@ export default function AdminConsultasPage() {
     nombre,
     email,
     telefono,
-    propiedad_id
+    propiedad_id,
+    mensaje,
+    estado,
+  propiedad:properties!consultas_propiedad_id_fkey (
+  title,
+  address
+)
   `)
   .order("created_at", { ascending: false });
-
+console.log("Consultas cargadas:", data);
       if (error) {
-        console.error("Error al cargar consultas:", error);
+        console.error("Error al cargar consultas:", error.message);
+console.error("Código:", error.code);
+console.error("Detalle:", error.details);
         setMessage("No se pudieron cargar las consultas.");
       } else {
         setConsultas(data ?? []);
@@ -115,8 +125,10 @@ export default function AdminConsultasPage() {
                   <tr>
                     <th className="p-4">Fecha</th>
                     <th className="p-4">Nombre</th>
-                    <th className="p-4">Contacto</th>
-                    <th className="p-4">Propiedad</th>
+ <th className="p-4">Contacto</th>
+<th className="p-4">Propiedad</th>
+<th className="p-4">Mensaje</th>
+<th className="p-4">Estado</th>
                   </tr>
                 </thead>
 
@@ -137,23 +149,64 @@ export default function AdminConsultasPage() {
                         )}
                         {consulta.email && <p>Email: {consulta.email}</p>}
                       </td>
-
                       <td className="p-4">
-                        {consulta.propiedad ? (
-                          <>
-                            <p className="font-medium">
-                              {consulta.propiedad.title}
-                            </p>
-                            <p className="text-slate-500">
-                              {consulta.propiedad.address}
-                            </p>
-                          </>
-                        ) : (
-                          <span className="text-slate-400">
-                            Sin propiedad asociada
-                          </span>
-                        )}
-                      </td>
+  {(() => {
+    const propiedad = Array.isArray(consulta.propiedad)
+      ? consulta.propiedad[0]
+      : consulta.propiedad;
+
+    return propiedad ? (
+      <div>
+        <p className="font-medium">
+          {propiedad.title}
+        </p>
+        <p className="text-slate-500">
+          {propiedad.address || "Sin dirección"}
+        </p>
+      </div>
+    ) : (
+      <span className="text-slate-400">
+        Sin propiedad asociada
+      </span>
+    );
+  })()}
+</td>
+<td className="p-4 min-w-[220px]">
+  {consulta.mensaje || "Sin mensaje"}
+</td>
+
+<td className="p-4">
+  <select
+    value={consulta.estado || "nuevo"}
+    onChange={async (e) => {
+      const nuevoEstado = e.target.value;
+
+      const { error } = await supabase
+        .from("consultas")
+        .update({ estado: nuevoEstado })
+        .eq("id", consulta.id);
+
+      if (error) {
+        setMessage("No se pudo actualizar el estado.");
+        return;
+      }
+
+      setConsultas((prev) =>
+        prev.map((c) =>
+          c.id === consulta.id
+            ? { ...c, estado: nuevoEstado }
+            : c
+        )
+      );
+    }}
+    className="rounded-full border border-slate-300 px-3 py-1 text-sm"
+  >
+    <option value="nuevo">Nuevo</option>
+    <option value="pendiente">Pendiente</option>
+    <option value="en_seguimiento">En seguimiento</option>
+    <option value="resuelto">Resuelto</option>
+  </select>
+</td>
                     </tr>
                   ))}
                 </tbody>
