@@ -145,8 +145,21 @@ console.error("Detalle:", error.details);
 
                       <td className="p-4">
                         {consulta.telefono && (
-                          <p>Teléfono: {consulta.telefono}</p>
-                        )}
+  <div>
+    <p>Teléfono: {consulta.telefono}</p>
+
+    <a
+      href={`https://wa.me/${consulta.telefono.replace(/\D/g, "")}?text=${encodeURIComponent(
+  `Hola ${consulta.nombre}, te contactamos de MCB Inmobiliaria por tu consulta.`
+)}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-2 inline-block rounded-md bg-green-600 px-3 py-2 text-xs font-semibold text-white hover:bg-green-700"
+    >
+      Contactar por WhatsApp
+    </a>
+  </div>
+)}
                         {consulta.email && <p>Email: {consulta.email}</p>}
                       </td>
                       <td className="p-4">
