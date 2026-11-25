@@ -23,7 +23,7 @@ export default function AdminConsultasPage() {
   const [consultas, setConsultas] = useState<Consulta[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-
+const [filtroEstado, setFiltroEstado] = useState("todos");
   useEffect(() => {
     async function loadConsultas() {
       const {
