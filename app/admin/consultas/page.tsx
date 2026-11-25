@@ -102,7 +102,24 @@ console.error("Detalle:", error.details);
             {consultas.length}
           </p>
         </div>
+<div className="mb-6 flex flex-wrap items-center gap-3">
+  <label htmlFor="filtroEstado" className="font-medium text-slate-700">
+    Filtrar por estado:
+  </label>
 
+  <select
+    id="filtroEstado"
+    value={filtroEstado}
+    onChange={(e) => setFiltroEstado(e.target.value)}
+    className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-800 shadow-sm"
+  >
+    <option value="todos">Todas las consultas</option>
+    <option value="nuevo">Nuevas</option>
+    <option value="Pendiente">Pendientes</option>
+    <option value="En seguimiento">En seguimiento</option>
+    <option value="Resuelto">Resueltas</option>
+  </select>
+</div>
         {message && (
           <div className="mb-6 rounded-lg bg-red-100 p-4 text-red-700">
             {message}
@@ -133,7 +150,7 @@ console.error("Detalle:", error.details);
                 </thead>
 
                 <tbody>
-                  {consultas.map((consulta) => (
+                  {consultas.filter((consulta) => filtroEstado === "todos" || consulta.estado === filtroEstado).map((consulta) => (
                     <tr key={consulta.id} className="border-b border-slate-200">
                       <td className="whitespace-nowrap p-4">
                         {formatoFecha(consulta.created_at)}
