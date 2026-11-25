@@ -114,10 +114,10 @@ console.error("Detalle:", error.details);
     className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-800 shadow-sm"
   >
     <option value="todos">Todas las consultas</option>
-    <option value="nuevo">Nuevas</option>
-    <option value="Pendiente">Pendientes</option>
-    <option value="En seguimiento">En seguimiento</option>
-    <option value="Resuelto">Resueltas</option>
+<option value="nuevo">Nuevas</option>
+<option value="pendiente">Pendientes</option>
+<option value="en_seguimiento">En seguimiento</option>
+<option value="Resuelto">Resueltas</option>
   </select>
 </div>
         {message && (
