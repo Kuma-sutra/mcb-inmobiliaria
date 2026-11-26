@@ -71,7 +71,27 @@ async function enviarConsulta(e: React.FormEvent<HTMLFormElement>) {
     setMensajeFormulario("No se pudo enviar la consulta. Intentá nuevamente.");
     return;
   }
+try {
+  const respuestaEmail = await fetch("/api/consultas", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      nombre: nombre.trim(),
+      email: email.trim(),
+      telefono: telefono.trim(),
+      mensaje: mensaje.trim(),
+      propiedad: property?.title || "Consulta desde la web",
+    }),
+  });
 
+  if (!respuestaEmail.ok) {
+    console.error("La consulta se guardó, pero no se pudo enviar el email.");
+  }
+} catch (error) {
+  console.error("Error al enviar la notificación:", error);
+}
   setNombre("");
   setEmail("");
   setTelefono("");
